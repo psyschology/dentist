@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Ramana's Dental Clinic | Jetweb Labs</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Fonts: Poppins (headings) and Inter (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Configure Tailwind with the brand's custom fonts and color palette -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                        'heading': ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand-blue-light': '#E0F2FE', // light blue
+                        'brand-blue': '#007BFF',       // professional blue
+                        'brand-blue-dark': '#0056b3',
+                        'brand-white': '#FFFFFF',
+                        'brand-text-dark': '#111827',
+                        'brand-text-light': '#6B7280',
+                        'brand-red': '#DC2626', // For discount
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Internal CSS for custom styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FFFFFF; /* brand-white */
+            color: #111827; /* brand-text-dark */
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+        }
+
+        /* Pricing Card Styles */
+        .pricing-card {
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            position: relative;
+            /* overflow: hidden; -- REMOVED. This was the mobile bug. */
+        }
+        
+        .pricing-card.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: var(--delay, 0s);
+        }
+
+        /* The "Hero" plan highlighting */
+        .pricing-card-hero {
+            border-color: #007BFF; /* brand-blue */
+            z-index: 10;
+        }
+        
+        /* Apply scale only on medium screens and up */
+        @media (min-width: 768px) {
+            .pricing-card-hero {
+                transform: scale(1.05);
+            }
+        }
+
+        /* New Early Bird Badge */
+        .discount-badge {
+            position: absolute;
+            top: 18px; /* Adjusted for visibility */
+            right: -32px; /* Adjusted for visibility */
+            background-color: var(--brand-red);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem; /* 12px */
+            padding: 0.25rem 2.5rem; /* Tighter padding */
+            transform: rotate(45deg);
+            width: 150px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 15;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Special badge for hero card so it's visible on blue */
+        .pricing-card-hero .discount-badge {
+            background-color: white;
+            color: var(--brand-red);
+        }
+        
+        /* Checkmark & Cross Styles */
+        .check {
+            color: #10B981; /* Green */
+            font-weight: 700;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        .cross {
+            color: #EF4444; /* Red */
+            font-weight: 700;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        /* * ========================================
+         * Responsive Table CSS
+         * ========================================
+        */
+        @media (max-width: 768px) {
+            .comparison-table {
+                display: block;
+                width: 100%;
+            }
+            .comparison-table thead {
+                display: none; /* Hide desktop headers */
+            }
+            .comparison-table tbody {
+                display: block;
+                width: 100%;
+            }
+            .comparison-table tr {
+                display: block;
+                width: 100%;
+                margin-bottom: 1.5rem;
+                border: 2px solid #E5E7EB;
+                border-radius: 0.5rem;
+                overflow: hidden;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            }
+            .comparison-table tr.section-header {
+                border: none;
+                margin-bottom: 0.5rem;
+                box-shadow: none;
+            }
+            .comparison-table tr.section-header td {
+                padding: 0.5rem 0;
+                font-size: 1.25rem;
+                text-align: left;
+                background-color: transparent !important;
+                color: #007BFF; /* brand-blue */
+            }
+            
+            .comparison-table td {
+                display: flex; /* This is the key */
+                justify-content: space-between; /* This is the key */
+                align-items: center;
+                width: 100%;
+                text-align: right;
+                padding: 1rem;
+                border-bottom: 1px solid #F3F4F6;
+                font-size: 0.9rem;
+            }
+            .comparison-table td:last-child {
+                border-bottom: none;
+            }
+
+            /* This creates the text label on the left from the data-label attribute */
+            .comparison-table td::before {
+                content: attr(data-label); /* Use the HTML data-label */
+                font-weight: 600;
+                color: #374151;
+                text-align: left;
+                padding-right: 1rem; /* Add some spacing */
+            }
+            
+            /* This is the first cell (feature name), which acts as the header card */
+            .comparison-table td.feature-name {
+                background-color: #111827; /* brand-text-dark */
+                color: #FFFFFF; /* brand-white */
+                text-align: left;
+                font-size: 1rem;
+                font-weight: 700;
+                padding: 1rem;
+                display: block; /* Override flex */
+            }
+            
+            /* Hide the ::before pseudo-element for the feature-name cell */
+            .comparison-table td.feature-name::before {
+                display: none;
+            }
+        }
+
+    </style>
+</head>
+<body class="bg-brand-white">
+
+    <!-- Header -->
+    <header class="py-5 border-b border-gray-100 bg-white">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <h1 class="text-3xl font-heading text-brand-blue">Jetweb Labs</h1>
+            <nav class="hidden md:flex">
+                <a href="#pricing" class="font-sans font-medium text-brand-text-light hover:text-brand-blue">Pricing</a>
+                <a href="#compare" class="font-sans font-medium text-brand-text-light hover:text-brand-blue ml-6">Compare</a>
+                <a href="#cta" class="font-sans font-medium text-brand-text-light hover:text-brand-blue ml-6">Get Started</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- Section 1: Hero & Pricing Table -->
+        <section id="pricing" class="py-20 md:py-32 bg-brand-blue-light">
+            <div class="container mx-auto px-6">
+                <!-- Heading -->
+                <div class="max-w-3xl mx-auto text-center mb-16">
+                    <h2 class="text-4xl md:text-5xl font-heading text-brand-text-dark">Choose Your Clinic's Plan</h2>
+                    <p class="text-lg text-brand-text-light mt-4">This is our special "Early Bird" pricing, saving you 50% on the one-time setup fee. This offer is limited to our first 5 clinic partners.</p>
+                </div>
+
+                <!-- Pricing Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-start">
+
+                    <!-- Plan 1: Starter Clinic (The Decoy) -->
+                    <div class="pricing-card bg-white border border-gray-200 rounded-xl shadow-lg p-8 flex flex-col" style="--delay: 0.1s;">
+                        <div class="discount-badge">EARLY BIRD</div>
+                        <h3 class="text-2xl font-heading text-brand-text-dark">Starter Clinic</h3>
+                        <p class="text-brand-text-light text-sm mt-1">Get online fast.</p>
+                        
+                        <div class="text-5xl font-heading text-brand-text-dark my-4">
+                            ₹2,999
+                        </div>
+                        <div class="text-2xl font-sans text-gray-400 line-through -mt-4">
+                            ₹4,999
+                        </div>
+                        <p class="text-sm font-sans text-gray-500 mt-2 mb-6">one-time</p>
+                        
+                        <p class="text-gray-600 mb-6">A single-page "Digital Business Card" to establish your professional presence and trust.</p>
+                        
+                        <ul class="space-y-3 text-gray-700 mb-8 flex-grow">
+                            <li class="flex items-center"><span class="check mr-3">✓</span>1-Page Professional Site</li>
+                            <li class="flex items-center"><span class="check mr-3">✓</span>Shows Location, Hours & Contact</li>
+                            <li class="flex items-center"><span class="check mr-3">✓</span>"Call Now" & "WhatsApp" Buttons</li>
+                            <li class="flex items-center"><span class="cross mr-3">✗</span><span class="text-gray-500">No Booking Engine</span></li>
+                        </ul>
+                        
+                        <a href="#cta" class="w-full text-center bg-gray-600 text-white py-3 px-6 rounded-lg font-heading text-lg hover:bg-gray-700 transition-colors">
+                            Get Started
+                        </a>
+                    </div>
+
+                    <!-- Plan 2: Pro Clinic (THE HERO) -->
+                    <div class="pricing-card pricing-card-hero bg-brand-blue text-white border-4 border-brand-blue rounded-xl shadow-2xl p-8 flex flex-col relative" style="--delay: 0s;">
+                        <div class="absolute -top-4 left-6 bg-white text-brand-blue font-heading text-sm font-bold py-2 px-5 rounded-md z-20">MOST POPULAR</div>
+                        <div class="discount-badge" style="background-color: white; color: var(--brand-red);">EARLY BIRD</div>
+                        
+                        <h3 class="text-2xl font-heading text-white">Pro Clinic</h3>
+                        <p class="text-blue-200 text-sm mt-1">Automate your practice.</p>
+                        
+                        <div class="text-5xl font-heading text-white my-4">
+                            ₹7,999
+                        </div>
+                        <div class="text-2xl font-sans text-blue-300 line-through -mt-4">
+                            ₹14,999
+                        </div>
+                        <p class="text-sm font-sans text-blue-100 mt-2 mb-6">one-time</p>
+                        
+                        <p class="text-blue-100 mb-6">**This is the demo we built for you.** The complete, multi-page website with the 24/7 Patient Booking Engine.</p>
+                        
+                        <ul class="space-y-3 text-white mb-8 flex-grow">
+                            <li class="flex items-center"><span class="check mr-3 text-brand-blue-light">✓</span>**The 24/7 Appointment Engine**</li>
+                            <li class="flex items-center"><span class="check mr-3 text-brand-blue-light">✓</span>Full Multi-Page Website</li>
+                            <li class="flex items-center"><span class="check mr-3 text-brand-blue-light">✓</span>Showcase Services & Testimonials</li>
+                            <li class="flex items-center"><span class="check mr-3 text-brand-blue-light">✓</span>**Free** .com Domain (1st Year)</li>
+                        </ul>
+                        
+                        <a href="#cta" class="w-full text-center bg-white text-brand-blue font-heading text-lg font-bold py-3 px-6 rounded-lg hover:bg-gray-100 transition-colors">
+                            Get Started
+                        </a>
+                    </div>
+
+                    <!-- Plan 3: Growth Partner (The Anchor) -->
+                    <div class="pricing-card bg-white border border-gray-200 rounded-xl shadow-lg p-8 flex flex-col" style="--delay: 0.2s;">
+                        <div class="discount-badge">EARLY BIRD</div>
+                        <h3 class="text-2xl font-heading text-brand-text-dark">Growth Partner</h3>
+                        <p class="text-brand-text-light text-sm mt-1">Get more new patients.</p>
+                        
+                        <div class="text-5xl font-heading text-brand-text-dark my-4">
+                            ₹15,999
+                        </div>
+                        <div class="text-2xl font-sans text-gray-400 line-through -mt-4">
+                             ₹29,999
+                        </div>
+                        <p class="text-sm font-sans text-gray-500 mt-2 mb-3">one-time setup</p>
+                        <p class="text-center font-bold text-gray-700 mb-6">+ ₹7,999 / month</p>
+                        
+                        <p class="text-gray-600 mb-6">Your complete marketing team. We build the "Pro" site, then work every month to get you found on Google.</p>
+                        
+                        <ul class="space-y-3 text-gray-700 mb-8 flex-grow">
+                            <li class="flex items-center"><span class="check mr-3">✓</span>**Everything in Pro, PLUS:**</li>
+                            <li class="flex items-center"><span class="check mr-3">✓</span>"Get More Patients" Marketing</li>
+                            <li class="flex items-center"><span class="check mr-3">✓</span>Monthly Google Business Profile SEO</li>
+                            <li class="flex items-center"><span class="check mr-3">✓</span>2x Monthly Blog Posts</li>
+                            <li class="flex items-center"><span class="check mr-3">✓</span>Priority Marketing Support</li>
+                        </ul>
+                        
+                        <a href="#cta" class="w-full text-center bg-gray-600 text-white py-3 px-6 rounded-lg font-heading text-lg hover:bg-gray-700 transition-colors">
+                            Get Started
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Feature Comparison Table -->
+        <section id="compare" class="py-20 md:py-32 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="max-w-3xl mx-auto text-center mb-16">
+                    <h2 class="text-4xl md:text-5xl font-heading text-brand-text-dark">Feature Comparison</h2>
+                    <p class="text-lg text-brand-text-light mt-4">See exactly what you get. The "Pro" plan is the booking engine we showed you in the demo.</p>
+                </div>
+
+                <table class="comparison-table w-full max-w-6xl mx-auto text-center">
+                    <thead class="bg-brand-blue-light">
+                        <tr>
+                            <th class="p-6 text-left font-heading text-lg text-brand-text-dark">Features</th>
+                            <th class="p-6 font-heading text-lg text-brand-text-dark">Starter Clinic</th>
+                            <th class="p-6 font-heading text-lg text-brand-blue">Pro Clinic</th>
+                            <th class="p-6 font-heading text-lg text-brand-text-dark">Growth Partner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Price Rows -->
+                        <tr class="bg-white">
+                            <td class="feature-name p-4 text-left text-gray-700 font-heading !text-lg !bg-white">Price (One-time)</td>
+                            <td data-label="Starter" class="plan-starter font-sans font-bold text-gray-700 text-base">
+                                <span class="line-through text-gray-400">₹4,999</span><br>₹2,999
+                            </td>
+                            <td data-label="Pro Clinic" class="plan-pro font-sans font-bold text-brand-blue text-base">
+                                <span class="line-through text-gray-400">₹14,999</span><br>₹7,999
+                            </td>
+                            <td data-label="Growth Partner" class="plan-growth font-sans font-bold text-gray-700 text-base">
+                                <span class="line-through text-gray-400">₹29,999</span><br>₹15,999
+                            </td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="feature-name p-4 text-left text-gray-700 font-heading !text-lg !bg-white">Monthly Fee</td>
+                            <td data-label="Starter" class="plan-starter font-sans font-bold text-gray-700 text-base">None</td>
+                            <td data-label="Pro Clinic" class="plan-pro font-sans font-bold text-gray-700 text-base">None</td>
+                            <td data-label="Growth Partner" class="plan-growth font-sans font-bold text-gray-700 text-base">₹7,999</td>
+                        </tr>
+
+                        <!-- Section Header -->
+                        <tr class="section-header">
+                            <td colspan="4" class="p-4 bg-gray-50 text-left font-heading text-2xl text-brand-blue">
+                                Core Website
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">1-Page "Digital Card"</td>
+                            <td data-label="Starter" class="plan-starter"><span class="check">✓</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">Multi-Page Site (5-7 Pages)</td>
+                            <td data-label="Starter" class="plan-starter"><span class="cross">✗</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">Detailed "Services" Pages</td>
+                            <td data-label="Starter" class="plan-starter"><span class="cross">✗</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">"Meet the Team" Page</td>
+                            <td data-label="Starter" class="plan-starter"><span class="cross">✗</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        
+                        <!-- Section Header -->
+                        <tr class="section-header">
+                            <td colspan="4" class="p-4 bg-gray-50 text-left font-heading text-2xl text-brand-blue">
+                                Patient Acquisition Tools
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">"Call Now" Button</td>
+                            <td data-label="Starter" class="plan-starter"><span class="check">✓</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700"><strong>24/7 Appointment Booking Engine</strong></td>
+                            <td data-label="Starter" class="plan-starter"><span class="cross">✗</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">Multi-Step Booking Form</td>
+                            <td data-label="Starter" class="plan-starter"><span class="cross">✗</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">Patient Testimonials Page</td>
+                            <td data-label="Starter" class="plan-starter"><span class="cross">✗</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">Live Instagram Feed</td>
+                            <td data-label="Starter" class="plan-starter"><span class="cross">✗</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+
+                        <!-- Section Header -->
+                        <tr class="section-header">
+                            <td colspan="4" class="p-4 bg-gray-50 text-left font-heading text-2xl text-brand-blue">
+                                Branding & Hosting
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">Custom .com Domain (Free 1st Year)</td>
+                            <td data-label="Starter" class="plan-starter"><span class="cross">✗</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">.jetweblabs.in Subdomain</td>
+                            <td data-label="Starter" class="plan-starter"><span class="check">✓</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="cross">✗</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="cross">✗</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">Secure SSL Certificate</td>
+                            <td data-label="Starter" class="plan-starter"><span class="check">✓</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">Premium Web Hosting</td>
+                            <td data-label="Starter" class="plan-starter"><span class="check">✓</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        
+                        <!-- Section Header -->
+                        <tr class="section-header">
+                            <td colspan="4" class="p-4 bg-gray-50 text-left font-heading text-2xl text-brand-blue">
+                                Monthly Marketing & Growth
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">Basic SEO Setup</td>
+                            <td data-label="Starter" class="plan-starter"><span class="cross">✗</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="check">✓</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">Monthly Google Profile Optimization</td>
+                            <td data-label="Starter" class="plan-starter"><span class="cross">✗</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="cross">✗</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">Monthly Local SEO</td>
+                            <td data-label="Starter" class="plan-starter"><span class="cross">✗</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="cross">✗</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td class="feature-name p-4 text-left text-gray-700">2 Patient-Education Blog Posts / mo</td>
+                            <td data-label="Starter" class="plan-starter"><span class="cross">✗</span></td>
+                            <td data-label="Pro Clinic" class="plan-pro"><span class="cross">✗</span></td>
+                            <td data-label="Growth Partner" class="plan-growth"><span class="check">✓</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 3: Final CTA (REBUILT) -->
+        <section id="cta" class="py-20 md:py-32 bg-brand-blue-light">
+            <div class="container mx-auto px-6 text-center max-w-2xl">
+                <h2 class="text-4xl md:text-5xl font-heading text-brand-text-dark">Ready to Build Your Digital Clinic?</h2>
+                <p class="text-lg text-brand-text-light mt-6 mb-10">To secure your 50% "Early Bird" discount, simply reply to our Email or Instagram DM with the plan you've chosen. We will then send you a secure Razorpay link for the 50% deposit.</p>
+                <div class="bg-white p-8 rounded-lg shadow-lg inline-block text-left max-w-lg w-full">
+                    <h3 class="font-heading text-2xl text-brand-text-dark">To Get Started:</h3>
+                    <p class="text-gray-600 mt-2 text-lg">Just send us a reply with your choice:</p>
+                    <p class="text-gray-800 font-bold text-lg bg-gray-100 p-4 rounded-md my-4">
+                        e.g., "I'm ready for the Pro Clinic plan."
+                    </p>
+                    <p class="text-gray-600 text-base">We will then send a secure Razorpay link for the 50% deposit (e.g., **₹3,999 for the Pro plan**) to begin development immediately.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-10 bg-brand-text-dark">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-400">&copy; 2025 JetWebLabs. All rights reserved. Pricing for Ramana's Dental Clinic.</p>
+        </div>
+    </footer>
+    
+    <!-- 
+      JavaScript for animations
+      This adds the subtle "fade-in-up" effect on the pricing cards.
+    -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.pricing-card');
+
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                cards.forEach(card => {
+                    observer.observe(card);
+                });
+            } else {
+                // Fallback for older browsers
+                cards.forEach(card => {
+                    card.classList.add('is-visible');
+                    card.style.opacity = 1;
+                    card.style.transform = 'none';
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
